@@ -1,27 +1,16 @@
-﻿using Platform.Steam;
-using System;
-using System.Xml.Serialization;
+﻿using System.Xml.Serialization;
 
 namespace TimeLoop.Functions
 {
-#if !XML_SERIALIZATION
-    [Serializable]
-#endif
     public class PlayerData
     {
-#if XML_SERIALIZATION
         [XmlAttribute]
-#endif
         public string ID;
 
-#if XML_SERIALIZATION
         [XmlAttribute]
-#endif
         public string PlayerName;
 
-#if XML_SERIALIZATION
         [XmlAttribute]
-#endif
         public bool SkipTimeLoop;
 
 

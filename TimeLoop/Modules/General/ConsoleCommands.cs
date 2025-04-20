@@ -1,10 +1,5 @@
-﻿#if XML_SERIALIZATION
-using ContentData = TimeLoop.Functions.XmlContentData;
-#else
-using ContentData = TimeLoop.Functions.JsonContentData;
-#endif
+﻿using ContentData = TimeLoop.Functions.XmlContentData;
 using System.Collections.Generic;
-using TimeLoop.Functions;
 using Platform;
 
 namespace TimeLoop.Modules

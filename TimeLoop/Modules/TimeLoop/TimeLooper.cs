@@ -1,14 +1,8 @@
-﻿#if XML_SERIALIZATION
-using ContentData = TimeLoop.Functions.XmlContentData;
-#else
-using ContentData = TimeLoop.Functions.JsonContentData;
-#endif
+﻿using ContentData = TimeLoop.Functions.XmlContentData;
 using System.Linq;
 using System.Collections.Generic;
 using TimeLoop.Functions;
 using Platform.Steam;
-using System;
-
 
 namespace TimeLoop.Modules
 {
@@ -24,19 +18,9 @@ namespace TimeLoop.Modules
 
         public void Update()
         {
-            switch (this.contentData.mode)
+            if (ShouldLoop() == false)
             {
-                case ContentData.Mode.WHITELIST:
-                    if(CheckIfAuthPlayerOnline()) return;
-                    break;
-                case ContentData.Mode.MIN_PLAYER_COUNT:
-                    if(CheckIfMinPlayerCountReached()) return;
-                    break;
-                case ContentData.Mode.MIN_WHITELIST_PLAYER_COUNT:
-                    if (CheckIfMinAuthPlayerCountReached()) return;
-                    break;
-                default:
-                    return;
+                return;
             }
 
             if (unscaledTimeStamp != UnityEngine.Time.unscaledTimeAsDouble)
@@ -46,12 +30,28 @@ namespace TimeLoop.Modules
                 if (dayTime == 0)
                 {
                     Log.Out("[TimeLoop] Time Reset.");
-                    Message.SendGlobalChat($"Resetting day. Please wait for authorized personnel or enough players to stop the time loop.");
+                    Message.SendGlobalChat($"[TimeLoop] Resetting day due to not enough players available.");
+
                     int previousDay = GameUtils.WorldTimeToDays(worldTime) - 1;
                     GameManager.Instance.World.SetTime(GameUtils.DaysToWorldTime(previousDay) + 2);
                 }
 
                 unscaledTimeStamp = UnityEngine.Time.unscaledTimeAsDouble;
+            }
+        }
+
+        public bool ShouldLoop()
+        {
+            switch (this.contentData.mode)
+            {
+                case ContentData.Mode.WHITELIST:
+                    return CheckIfAuthPlayerOnline();
+                case ContentData.Mode.MIN_PLAYER_COUNT:
+                    return CheckIfMinPlayerCountReached();
+                case ContentData.Mode.MIN_WHITELIST_PLAYER_COUNT:
+                    return CheckIfMinAuthPlayerCountReached();
+                default:
+                    return false;
             }
         }
 
