@@ -18,26 +18,30 @@ namespace TimeLoop.Modules
 
         public void Update()
         {
-            if (ShouldLoop() == false)
+            if (unscaledTimeStamp == UnityEngine.Time.unscaledTimeAsDouble)
             {
                 return;
             }
 
-            if (unscaledTimeStamp != UnityEngine.Time.unscaledTimeAsDouble)
+            ulong worldTime = GameManager.Instance.World.GetWorldTime();
+            ulong dayTime = worldTime % 24000;
+            if (dayTime == 0)
             {
-                ulong worldTime = GameManager.Instance.World.GetWorldTime();
-                ulong dayTime = worldTime % 24000;
-                if (dayTime == 0)
+                if (ShouldLoop() == false)
                 {
-                    Log.Out("[TimeLoop] Time Reset.");
-                    Message.SendGlobalChat($"[TimeLoop] Resetting day due to not enough players available.");
+                    Log.Out("[TimeLoop] No reset.");
 
-                    int previousDay = GameUtils.WorldTimeToDays(worldTime) - 1;
-                    GameManager.Instance.World.SetTime(GameUtils.DaysToWorldTime(previousDay) + 2);
+                    return;
                 }
 
-                unscaledTimeStamp = UnityEngine.Time.unscaledTimeAsDouble;
+                Log.Out("[TimeLoop] Time reset.");
+                Message.SendGlobalChat($"[TimeLoop] Resetting day due to not enough players available.");
+
+                int previousDay = GameUtils.WorldTimeToDays(worldTime) - 1;
+                GameManager.Instance.World.SetTime(GameUtils.DaysToWorldTime(previousDay) + 2);
             }
+
+            unscaledTimeStamp = UnityEngine.Time.unscaledTimeAsDouble;
         }
 
         public bool ShouldLoop()

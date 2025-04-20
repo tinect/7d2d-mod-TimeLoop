@@ -3,8 +3,8 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
-    <BaseOutputPath>D:\Spiele\Steam\SteamApps\common\7 Days to Die Dedicated Server</BaseOutputPath>
-    <OutputPath>D:\Spiele\Steam\SteamApps\common\7 Days to Die Dedicated Server\Mods\TimeLoop</OutputPath>
+    <BaseOutputPath></BaseOutputPath>
+    <OutputPath></OutputPath>
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
@@ -30,6 +30,12 @@
 		<HintPath>D:\Spiele\Steam\SteamApps\common\7 Days to Die Dedicated Server\7DaysToDieServer_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
 		<Private>False</Private>
     </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="ModInfo.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
 </Project>
