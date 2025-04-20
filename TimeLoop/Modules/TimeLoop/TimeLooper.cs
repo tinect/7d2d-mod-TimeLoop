@@ -49,11 +49,11 @@ namespace TimeLoop.Modules
             switch (this.contentData.mode)
             {
                 case ContentData.Mode.WHITELIST:
-                    return CheckIfAuthPlayerOnline();
+                    return CheckIfAuthPlayerOnline() == false;
                 case ContentData.Mode.MIN_PLAYER_COUNT:
-                    return CheckIfMinPlayerCountReached();
+                    return CheckIfMinPlayerCountReached() == false;
                 case ContentData.Mode.MIN_WHITELIST_PLAYER_COUNT:
-                    return CheckIfMinAuthPlayerCountReached();
+                    return CheckIfMinAuthPlayerCountReached() == false;
                 default:
                     return false;
             }
