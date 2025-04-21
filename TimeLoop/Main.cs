@@ -1,11 +1,8 @@
 ﻿using ContentData = TimeLoop.Functions.XmlContentData;
 using System.Linq;
-using System.Text;
 using TimeLoop.Modules;
 using TimeLoop.Functions;
 using Platform.Steam;
-using System.Collections.Generic;
-using System;
 
 namespace TimeLoop
 {
@@ -13,17 +10,16 @@ namespace TimeLoop
     {
         private TimeLooper timeLooper;
         private ContentData contentData;
-        private bool currentLoopState = true;
+        private bool? currentLoopState = null;
 
         public void InitMod(Mod _modInstance)
         {
             Log.Out("[TimeLoop] Initializing ...");
+
             ModEvents.GameAwake.RegisterHandler(Awake);
             ModEvents.GameUpdate.RegisterHandler(Update);
-            ModEvents.PlayerLogin.RegisterHandler(PlayerLogin);
             ModEvents.PlayerSpawnedInWorld.RegisterHandler(PlayerSpawnedInWorld);
             ModEvents.PlayerDisconnected.RegisterHandler(PlayerDisconnected);
-            //SdtdConsole.Instance.RegisterCommands();
         }
 
         private void Awake()
@@ -63,24 +59,26 @@ namespace TimeLoop
             }
         }
 
-        private bool PlayerLogin(ClientInfo cInfo, string message, StringBuilder stringBuild)
+        private void PlayerSpawnedInWorld(ClientInfo cInfo, RespawnType type, Vector3i i)
         {
             if (GameManager.Instance == null || !GameManager.IsDedicatedServer)
             {
-                return true;
+                return;
             }
-
+            
             if (cInfo?.CrossplatformId == null)
             {
-                return true;
+                return;
             }
 
-            if (contentData?.PlayerData == null)
+            if (!this.timeLooper.clients.ContainsKey(cInfo.CrossplatformId.CombinedString))
             {
-                return true;
+                this.timeLooper.clients.Add(cInfo.CrossplatformId.CombinedString, cInfo);
             }
 
-            if (contentData.PlayerData.Exists(
+            checkXpState();
+
+            if (contentData.PlayerData?.Exists(
                 x => (x.ID == cInfo.CrossplatformId.CombinedString)
                 || (cInfo.PlatformId != null && cInfo.PlatformId is UserIdentifierSteam && x.ID == (cInfo.PlatformId as UserIdentifierSteam)?.SteamId.ToString()))
                 == false)
@@ -91,31 +89,6 @@ namespace TimeLoop
                 Log.Out($"[TimeLoop] Player added to config. {contentData.PlayerData.Last().ID}");
             }
 
-            bool shouldLoop = this.timeLooper?.ShouldLoop() == true;
-
-            if (shouldLoop == true)
-            {
-                GameStats.Set(EnumGameStats.XPMultiplier, 0);
-
-                Log.Out($"[TimeLoop] The time will reset every 24 hours until enough players are online.");
-            }
-
-            if (shouldLoop != this.currentLoopState)
-            {
-                if (shouldLoop == false)
-                {
-                    Message.SendGlobalChat($"[TimeLoop] disabled. Happy farming.");
-                    Message.SendGlobalChat($"[TimeLoop] The current XPMultiplier is:" + GameStats.GetInt(EnumGameStats.XPMultiplier) / 100);
-                }
-            }
-
-            this.currentLoopState = shouldLoop;
-
-            return true;
-        }
-
-        private void PlayerSpawnedInWorld(ClientInfo cInfo, RespawnType type, Vector3i i)
-        {
             if (type != RespawnType.JoinMultiplayer)
             {
                 return;
@@ -126,8 +99,7 @@ namespace TimeLoop
                 return;
             }
 
-            Message.SendPrivateChat($"[TimeLoop] The time will reset every 24 hours until enough players are online.", cInfo);
-            Message.SendPrivateChat($"[TimeLoop] The current XPMultiplier is:" + GameStats.GetInt(EnumGameStats.XPMultiplier) / 100, cInfo);
+            Message.SendPrivateChat(string.Format("Hi {0}, the day will loop and you won't gain any expience until enough players are online.", cInfo.playerName), cInfo);
         }
 
         private void PlayerDisconnected(ClientInfo cInfo, bool becauseShutdown)
@@ -142,28 +114,57 @@ namespace TimeLoop
                 return;
             }
 
-            bool shouldLoop = this.timeLooper?.ShouldLoop() == true;
+            this.timeLooper.clients.Remove(cInfo.CrossplatformId.CombinedString);
 
-            if (shouldLoop == true)
+            checkXpState();
+        }
+
+        private void checkXpState()
+        {
+            bool shouldLoop = this.timeLooper.ShouldLoop();
+
+            try
             {
-                GameStats.Set(EnumGameStats.XPMultiplier, GamePrefs.GetInt(EnumGamePrefs.XPMultiplier));
-                Message.SendGlobalChat($"[TimeLoop] The time will reset every 24 hours until enough players are online.");
-                Message.SendPrivateChat($"[TimeLoop] The current XPMultiplier is:" + (GameStats.GetInt(EnumGameStats.XPMultiplier) / 100), cInfo);
-            }
-
-            this.currentLoopState = shouldLoop;
-
-            // TODO: Player disconnect created new party with new leader
-            if (GameManager.Instance.World.Players.dict.TryGetValue(cInfo.entityId, out EntityPlayer disconnectedPlayer) && disconnectedPlayer == disconnectedPlayer.party?.Leader)
-            {
-                List<int> partyMembers = new List<int>();
-                foreach (EntityPlayer player in disconnectedPlayer.party.MemberList)
+                if (shouldLoop == this.currentLoopState)
                 {
-                    if (player == disconnectedPlayer) continue;
-
-                    partyMembers.Add(player.entityId);
+                    return;
                 }
-                PartyManager.Current.CreateClientParty(GameManager.Instance.World, PartyManager.Current.nextPartyID, 0, partyMembers.ToArray(), disconnectedPlayer.party.VoiceLobbyId);
+
+                if (shouldLoop == true)
+                {
+                    Message.SendGlobalChat($"The day will loop and you won't gain any expience until enough players are online.");
+
+                    return;
+                }
+
+                Message.SendGlobalChat($"Disabled. Happy farming.");
+            } finally
+            {
+                this.currentLoopState = shouldLoop;
+                ensureExpBuffs();
+            }
+        }
+
+        private void ensureExpBuffs()
+        {
+            foreach (var player in GameManager.Instance.World.Players.list)
+            {
+                var hasBuff = player.Buffs.HasBuff("NoExp");
+
+                if (this.currentLoopState == true)
+                {
+                    if (!hasBuff)
+                    {
+                        player.Buffs.AddBuff("NoExp");
+                    }
+
+                    continue;
+                }
+
+                if (hasBuff)
+                {
+                    player.Buffs.RemoveBuff("NoExp");
+                }
             }
         }
     }

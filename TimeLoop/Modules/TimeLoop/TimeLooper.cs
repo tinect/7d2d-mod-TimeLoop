@@ -1,5 +1,4 @@
 ﻿using ContentData = TimeLoop.Functions.XmlContentData;
-using System.Linq;
 using System.Collections.Generic;
 using TimeLoop.Functions;
 using Platform.Steam;
@@ -9,6 +8,7 @@ namespace TimeLoop.Modules
     public class TimeLooper
     {
         ContentData contentData;
+        public Dictionary<string, ClientInfo> clients = new Dictionary<string, ClientInfo>();
         double unscaledTimeStamp;
 
         public TimeLooper(ContentData contentData)
@@ -29,13 +29,13 @@ namespace TimeLoop.Modules
             {
                 if (ShouldLoop() == false)
                 {
-                    Log.Out("[TimeLoop] No reset.");
+                    Log.Out("[TimeLoop] No loop.");
 
                     return;
                 }
 
-                Log.Out("[TimeLoop] Time reset.");
-                Message.SendGlobalChat($"[TimeLoop] Resetting day due to not enough players available.");
+                Log.Out("[TimeLoop] Day loop.");
+                Message.SendGlobalChat($"Looping day due to not enough players available.");
 
                 int previousDay = GameUtils.WorldTimeToDays(worldTime) - 1;
                 GameManager.Instance.World.SetTime(GameUtils.DaysToWorldTime(previousDay) + 2);
@@ -61,10 +61,9 @@ namespace TimeLoop.Modules
 
         private bool CheckIfAuthPlayerOnline()
         {
-            List<ClientInfo> clients = GetConnectedClients();
-            for (int i = 0; i < clients.Count; i++)
+            foreach (ClientInfo client in clients.Values)
             {
-                if (IsClientAuthorized(clients[i]))
+                if (IsClientAuthorized(client))
                 {
                     return true;
                 }
@@ -75,7 +74,6 @@ namespace TimeLoop.Modules
 
         private bool CheckIfMinPlayerCountReached()
         {
-            List<ClientInfo> clients = GetConnectedClients();
             return clients.Count >= this.contentData.MinPlayers;
         }
 
@@ -83,31 +81,15 @@ namespace TimeLoop.Modules
         {
             int authorizedClientCount = 0;
 
-            List<ClientInfo> clients = GetConnectedClients();
-            for (int i = 0; i < clients.Count; i++)
+            foreach (ClientInfo client in clients.Values)
             {
-                if (IsClientAuthorized(clients[i]))
+                if (IsClientAuthorized(client))
                 {
                     authorizedClientCount++;
                 }
             }
-            return authorizedClientCount >= this.contentData.MinPlayers;
-        }
 
-        private List<ClientInfo> GetConnectedClients()
-        {
-            if (ConnectionManager.Instance.Clients != null && ConnectionManager.Instance.Clients.Count > 0)
-            {
-                return ConnectionManager.Instance.Clients.List.Where(x => 
-                x != null &&
-                x.loginDone &&
-                (x.CrossplatformId != null ||
-                x.PlatformId != null)).ToList();
-            }
-            else
-            {
-                return new List<ClientInfo>();
-            }
+            return authorizedClientCount >= this.contentData.MinPlayers;
         }
 
         private bool IsClientAuthorized(ClientInfo cInfo)

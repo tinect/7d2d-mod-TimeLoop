@@ -1,0 +1,10 @@
+﻿<configs>
+	<append xpath="/buffs">
+		
+		<buff name="NoExp" name_key="NoExpName" description_key="NoExpDesc" icon="ui_game_symbol_lock" icon_color="255,255,255" >
+			<effect_group>
+				<passive_effect name="PlayerExpGain" operation="base_set" value="0"/>
+			</effect_group>
+		</buff>
+	</append>
+</configs>

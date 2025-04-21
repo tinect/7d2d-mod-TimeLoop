@@ -8,10 +8,12 @@
     <ProduceReferenceAssembly>False</ProduceReferenceAssembly>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AppendRuntimeIdentifierToOutputPath>false</AppendRuntimeIdentifierToOutputPath>
-    <UseCommonOutputDirectory>true</UseCommonOutputDirectory>
+    <UseCommonOutputDirectory>false</UseCommonOutputDirectory>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+	  <BaseOutputPath>D:\Spiele\Steam\SteamApps\common\7 Days to Die Dedicated Server\Mods\TimeLoop</BaseOutputPath>
+	  <OutputPath>D:\Spiele\Steam\SteamApps\common\7 Days to Die Dedicated Server\Mods\TimeLoop</OutputPath>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
@@ -33,6 +35,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Config\buffs.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Config\Localization.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
     <None Update="ModInfo.xml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

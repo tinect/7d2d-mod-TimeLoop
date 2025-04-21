@@ -5,9 +5,9 @@
     },
     "Profile 1": {
       "commandName": "Executable",
-      "executablePath": "<YourServerDirectory>\\7DaysToDieServer.exe",
+      "executablePath": "D:\\Spiele\\Steam\\SteamApps\\common\\7 Days to Die Dedicated Server\\7DaysToDieServer.exe",
       "commandLineArgs": "-logfile \"7DaysToDieServer_Data\\debug_log.txt\" -quit -batchmode -nographics -configfile=serverconfig.xml -dedicated",
-      "workingDirectory": "<YourServerDirectory>"
+      "workingDirectory": "D:\\Spiele\\Steam\\SteamApps\\common\\7 Days to Die Dedicated Server\\"
     }
   }
 }

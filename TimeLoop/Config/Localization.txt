@@ -1,0 +1,3 @@
+Key,English,German
+NoExpName,"Experience blocker","Erfahrungs-Blocker"
+NoExpDesc,"You gain no experience while there are no enough players","Du erhältst keine Erfahrung, solang nicht genug Spieler vorhanden sind"
