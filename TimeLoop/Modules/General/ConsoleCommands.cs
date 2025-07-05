@@ -18,6 +18,8 @@ namespace TimeLoop.Modules
 
         public DeviceFlag AllowedDeviceTypesClient => DeviceFlag.StandaloneWindows;
 
+        public string PrimaryCommand => "";
+
         public void Execute(List<string> commandParams, CommandSenderInfo senderInfo)
         {
             if (!ContentData)

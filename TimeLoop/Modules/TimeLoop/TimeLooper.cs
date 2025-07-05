@@ -18,6 +18,11 @@ namespace TimeLoop.Modules
 
         public void Update()
         {
+            if (this.contentData.EnableTimeLooper == false)
+            {
+                return;
+            }
+
             if (unscaledTimeStamp == UnityEngine.Time.unscaledTimeAsDouble)
             {
                 return;
@@ -46,6 +51,11 @@ namespace TimeLoop.Modules
 
         public bool ShouldLoop()
         {
+            if (this.contentData.EnableTimeLooper == false)
+            {
+                return false;
+            }
+
             switch (this.contentData.mode)
             {
                 case ContentData.Mode.WHITELIST:

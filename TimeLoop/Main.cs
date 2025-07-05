@@ -3,6 +3,8 @@ using System.Linq;
 using TimeLoop.Modules;
 using TimeLoop.Functions;
 using Platform.Steam;
+using UnityEngine;
+using System;
 
 namespace TimeLoop
 {
@@ -20,9 +22,15 @@ namespace TimeLoop
             ModEvents.GameUpdate.RegisterHandler(Update);
             ModEvents.PlayerSpawnedInWorld.RegisterHandler(PlayerSpawnedInWorld);
             ModEvents.PlayerDisconnected.RegisterHandler(PlayerDisconnected);
+            ModEvents.GameStartDone.RegisterHandler(OnGameStart);
         }
 
-        private void Awake()
+        private void OnGameStart(ref ModEvents.SGameStartDoneData _data)
+        {
+            GameManager.Instance.StartCoroutine(EnsureSameExp());
+        }
+
+        private void Awake(ref ModEvents.SGameAwakeData _data)
         {
             if (GameManager.Instance == null || !GameManager.IsDedicatedServer)
             {
@@ -40,7 +48,7 @@ namespace TimeLoop
             }
         }
 
-        private void Update()
+        private void Update(ref ModEvents.SGameUpdateData _data)
         {
             if (GameManager.Instance == null || !GameManager.IsDedicatedServer)
             {
@@ -53,19 +61,18 @@ namespace TimeLoop
             }
 
             contentData.CheckForUpdate();
-            if (contentData.EnableTimeLooper)
-            {
-                this.timeLooper?.Update();
-            }
+            this.timeLooper?.Update();
         }
 
-        private void PlayerSpawnedInWorld(ClientInfo cInfo, RespawnType type, Vector3i i)
+        private void PlayerSpawnedInWorld(ref ModEvents.SPlayerSpawnedInWorldData _data)
         {
             if (GameManager.Instance == null || !GameManager.IsDedicatedServer)
             {
                 return;
             }
-            
+
+            var cInfo = _data.ClientInfo;
+
             if (cInfo?.CrossplatformId == null)
             {
                 return;
@@ -89,7 +96,7 @@ namespace TimeLoop
                 Log.Out($"[TimeLoop] Player added to config. {contentData.PlayerData.Last().ID}");
             }
 
-            if (type != RespawnType.JoinMultiplayer)
+            if (_data.RespawnType != RespawnType.JoinMultiplayer)
             {
                 return;
             }
@@ -102,12 +109,14 @@ namespace TimeLoop
             Message.SendPrivateChat(string.Format("Hi {0}, the day will loop and you won't gain any expience until enough players are online.", cInfo.playerName), cInfo);
         }
 
-        private void PlayerDisconnected(ClientInfo cInfo, bool becauseShutdown)
+        private void PlayerDisconnected(ref ModEvents.SPlayerDisconnectedData _data)
         {
             if (GameManager.Instance == null || !GameManager.IsDedicatedServer)
             {
                 return;
             }
+
+            var cInfo = _data.ClientInfo;
 
             if (cInfo?.CrossplatformId == null)
             {
@@ -138,7 +147,8 @@ namespace TimeLoop
                 }
 
                 Message.SendGlobalChat($"Disabled. Happy farming.");
-            } finally
+            }
+            finally
             {
                 this.currentLoopState = shouldLoop;
                 ensureExpBuffs();
@@ -150,7 +160,6 @@ namespace TimeLoop
             foreach (var player in GameManager.Instance.World.Players.list)
             {
                 var hasBuff = player.Buffs.HasBuff("NoExp");
-
                 if (this.currentLoopState == true)
                 {
                     if (!hasBuff)
@@ -165,6 +174,45 @@ namespace TimeLoop
                 {
                     player.Buffs.RemoveBuff("NoExp");
                 }
+            }
+        }
+
+        private System.Collections.IEnumerator EnsureSameExp()
+        {
+            while (true)
+            {
+                //SdtdConsole.Instance.ExecuteSync($"givexp {player.entityId} 100", null);
+                
+                var onlinePlayers = GameManager.Instance.World.Players.list;
+
+                if (onlinePlayers.Count > 0)
+                {
+                    var persistentPlayerList = GameManager.Instance.GetPersistentPlayerList().Players;
+                    foreach ( var player in persistentPlayerList )
+                    {
+                        //player.Value
+                    }
+
+                    int maxLevel = onlinePlayers.Max(player => player.Progression.GetLevel());
+                    float maxLevelFloat = onlinePlayers.Max(player => player.Progression.getLevelFloat());
+
+                    foreach (var onlinePlayer in onlinePlayers)
+                    {
+                        onlinePlayer.Update();
+                        if (onlinePlayer.Progression.GetLevel() >= maxLevel)
+                        {
+                            //continue;
+                        }
+                        
+                        int exp = onlinePlayer.Progression.getExpForLevel(maxLevel+2);
+                        int currentExp = onlinePlayer.Progression.getExpForLevel(onlinePlayer.Progression.getLevelFloat());
+                        int expForNextLevel = onlinePlayer.Progression.ExpToNextLevel;
+                        //player.Progression.AddLevelExp(exp);
+                        Log.Out($"[TimeLoop] {onlinePlayer.name} has been given {exp} (max user has {currentExp} at float {maxLevelFloat}) exp to reach level {maxLevel}. Needs {expForNextLevel} for next level.");
+                    }
+                }
+
+                yield return new WaitForSeconds(5); // alle 5 Sekunden
             }
         }
     }
