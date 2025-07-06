@@ -41,11 +41,11 @@ namespace TimeLoop.Functions
         protected DateTime lastModified;
 
         public bool EnableTimeLooper = true;
-        public Mode mode = Mode.WHITELIST;
+        public Mode mode = Mode.MIN_PLAYER_COUNT;
 
         [XmlArray("KnownPlayers")]
         public List<PlayerData> PlayerData = new List<PlayerData>();
-        public int MinPlayers = 5;
+        public int MinPlayers = 2;
 
         public static XmlContentData DeserializeInstance()
         {
