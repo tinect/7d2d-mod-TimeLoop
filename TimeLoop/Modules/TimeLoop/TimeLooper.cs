@@ -40,7 +40,7 @@ namespace TimeLoop.Modules
                 }
 
                 Log.Out("[TimeLoop] Day loop.");
-                Message.SendGlobalChat($"Looping day due to not enough players available.");
+                Message.SendGlobalChat(Localization.Get("TimeLoopLoopingDay"));
 
                 int previousDay = GameUtils.WorldTimeToDays(worldTime) - 1;
                 GameManager.Instance.World.SetTime(GameUtils.DaysToWorldTime(previousDay) + 2);

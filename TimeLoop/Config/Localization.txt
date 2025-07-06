@@ -1,3 +1,6 @@
 Key,English,German
 NoExpName,"Experience blocker","Erfahrungs-Blocker"
 NoExpDesc,"You gain no experience while there are no enough players","Du erhältst keine Erfahrung, solang nicht genug Spieler vorhanden sind"
+TimeLoopLoopingDay,"Looping day due to not enough players available.","Tag wird wiederholt, da nicht genug Spieler vorhanden sind."
+TimeLoopPlayerInfo,"Hi {0}, the day will loop and you won't gain any expience until enough players are online.","Hallo {0}, der Tag wird wiederholt und du erhältst keine Erfahrung, bis genug Spieler online sind."
+TimeLoopDisabled,"Disabled. Happy farming.","Deaktiviert. Viel Spaß beim Farmen."

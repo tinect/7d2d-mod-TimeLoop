@@ -100,7 +100,7 @@ namespace TimeLoop
                 return;
             }
 
-            Message.SendPrivateChat(string.Format("Hi {0}, the day will loop and you won't gain any expience until enough players are online.", cInfo.playerName), cInfo);
+            Message.SendPrivateChat(string.Format(Localization.Get("TimeLoopPlayerInfo"), cInfo.playerName), cInfo);
         }
 
         private void PlayerDisconnected(ref ModEvents.SPlayerDisconnectedData _data)
@@ -135,12 +135,12 @@ namespace TimeLoop
 
                 if (shouldLoop == true)
                 {
-                    Message.SendGlobalChat($"The day will loop and you won't gain any expience until enough players are online.");
+                    Message.SendGlobalChat(Localization.Get("TimeLoopLoopingDay"));
 
                     return;
                 }
 
-                Message.SendGlobalChat($"Disabled. Happy farming.");
+                Message.SendGlobalChat(Localization.Get("TimeLoopDisabled"));
             }
             finally
             {
