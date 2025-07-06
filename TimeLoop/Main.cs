@@ -22,12 +22,6 @@ namespace TimeLoop
             ModEvents.GameUpdate.RegisterHandler(Update);
             ModEvents.PlayerSpawnedInWorld.RegisterHandler(PlayerSpawnedInWorld);
             ModEvents.PlayerDisconnected.RegisterHandler(PlayerDisconnected);
-            ModEvents.GameStartDone.RegisterHandler(OnGameStart);
-        }
-
-        private void OnGameStart(ref ModEvents.SGameStartDoneData _data)
-        {
-            GameManager.Instance.StartCoroutine(EnsureSameExp());
         }
 
         private void Awake(ref ModEvents.SGameAwakeData _data)
@@ -174,45 +168,6 @@ namespace TimeLoop
                 {
                     player.Buffs.RemoveBuff("NoExp");
                 }
-            }
-        }
-
-        private System.Collections.IEnumerator EnsureSameExp()
-        {
-            while (true)
-            {
-                //SdtdConsole.Instance.ExecuteSync($"givexp {player.entityId} 100", null);
-                
-                var onlinePlayers = GameManager.Instance.World.Players.list;
-
-                if (onlinePlayers.Count > 0)
-                {
-                    var persistentPlayerList = GameManager.Instance.GetPersistentPlayerList().Players;
-                    foreach ( var player in persistentPlayerList )
-                    {
-                        //player.Value
-                    }
-
-                    int maxLevel = onlinePlayers.Max(player => player.Progression.GetLevel());
-                    float maxLevelFloat = onlinePlayers.Max(player => player.Progression.getLevelFloat());
-
-                    foreach (var onlinePlayer in onlinePlayers)
-                    {
-                        onlinePlayer.Update();
-                        if (onlinePlayer.Progression.GetLevel() >= maxLevel)
-                        {
-                            //continue;
-                        }
-                        
-                        int exp = onlinePlayer.Progression.getExpForLevel(maxLevel+2);
-                        int currentExp = onlinePlayer.Progression.getExpForLevel(onlinePlayer.Progression.getLevelFloat());
-                        int expForNextLevel = onlinePlayer.Progression.ExpToNextLevel;
-                        //player.Progression.AddLevelExp(exp);
-                        Log.Out($"[TimeLoop] {onlinePlayer.name} has been given {exp} (max user has {currentExp} at float {maxLevelFloat}) exp to reach level {maxLevel}. Needs {expForNextLevel} for next level.");
-                    }
-                }
-
-                yield return new WaitForSeconds(5); // alle 5 Sekunden
             }
         }
     }
